@@ -7,18 +7,32 @@ import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
+var session = require("express-session");
+var SQLiteStore = require("connect-sqlite3")(session);
 
 const main = async () => {
     const orm = await MikroORM.init(microConfig);
     await orm.getMigrator().up();
 
     const app = express();
+
+    app.use(
+        session({
+            name: "qid",
+            store: new SQLiteStore(),
+            secret: "asdfasdfasdfasdfasdfasdfa",
+            resave: true,
+            saveUninitialized: true,
+            cookie: { maxAge: 5 * 365 * 24 * 60 * 60 * 1000 }, // 5 years
+        })
+    );
+
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
             resolvers: [PostResolver, UserResolver],
             validate: false,
         }),
-        context: () => ({ em: orm.em }),
+        context: ({ req, res }) => ({ em: orm.em, req, res }),
     });
     apolloServer.applyMiddleware({ app });
     app.listen(4000, () => {
