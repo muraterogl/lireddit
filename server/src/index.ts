@@ -7,6 +7,7 @@ import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
+import cors from "cors";
 var session = require("express-session");
 var SQLiteStore = require("connect-sqlite3")(session);
 
@@ -15,6 +16,8 @@ const main = async () => {
     await orm.getMigrator().up();
 
     const app = express();
+
+    app.use(cors({ origin: "http://192.168.1.103:3000", credentials: true }));
 
     app.use(
         session({
@@ -34,7 +37,10 @@ const main = async () => {
         }),
         context: ({ req, res }) => ({ em: orm.em, req, res }),
     });
-    apolloServer.applyMiddleware({ app });
+    apolloServer.applyMiddleware({
+        app,
+        cors: false,
+    });
     app.listen(4000, () => {
         console.log("server started on localhost:4000");
     });
