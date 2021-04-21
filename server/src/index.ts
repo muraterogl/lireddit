@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { MikroORM } from "@mikro-orm/core";
-import { __prod__ } from "./constants";
+import { COOKIE_NAME, __prod__ } from "./constants";
 import microConfig from "./mikro-orm.config";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
@@ -17,11 +17,11 @@ const main = async () => {
 
     const app = express();
 
-    app.use(cors({ origin: "http://192.168.1.103:3000", credentials: true }));
+    app.use(cors({ origin: "http://127.0.0.1:3000", credentials: true }));
 
     app.use(
         session({
-            name: "qid",
+            name: COOKIE_NAME,
             store: new SQLiteStore(),
             secret: "asdfasdfasdfasdfasdfasdfa",
             resave: true,
